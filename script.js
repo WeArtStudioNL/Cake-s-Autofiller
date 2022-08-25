@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cake's autofiller
 // @namespace    bazaar
-// @version      3.1
+// @version      3.2
 // @license MIT
 // @description  Helps add items to your bazaar quicker by auto filling Qty and price when clicked
 // @author       Pancakegh[2016971]
@@ -598,13 +598,13 @@ display:block;
     $(document).on("click", "#addId", function () {
         itemstocheck.push(String($(this).html()))
         localStorage.setItem("itemstocheck", JSON.stringify(itemstocheck));
-        console.log(itemstocheck);
+        //console.log(itemstocheck);
     })
     $(document).on("keyup", "#searchbar", function () {
         var searchinput = $(this).val();
         searchinput = cap(searchinput)
         for (var key in itemarray) {
-            console.log(key + key.indexOf(searchinput));
+            //console.log(key + key.indexOf(searchinput));
             if (key.indexOf(searchinput) != -1) {
                 $("#searchbarresult").html("<b>" + key + "<b><br>ID - <span id='addId' style='cursor:pointer;' title='Add to price checker'>" + itemarray[key] + "</span><br><br>");
                 break;
@@ -626,8 +626,12 @@ display:block;
         $('.ca-result').html("");
         var interval = 500
         var countindex = 0;
-        $('.ca-result').append("Looking for profitable plushies..\n");
+      var itemname = ""
+        $('.ca-result').append("Looking for profitable plushies..<br>");
+
         itemstocheck.forEach(function (element, index) {
+          
+        
             countindex++;
             setTimeout(function () {
                 if (c_api_key !== '' && c_api_key !== undefined) {
@@ -674,11 +678,18 @@ display:block;
                                 var linkarray = thelink.split(/\"/)
                                 linkarray[3] = linkarray[3] + "&tt_itemid=" + itemID
                                 thelink = linkarray[0] + linkarray[1] + linkarray[2] + linkarray[3] + linkarray[4];
+                              
+                              for (var k in itemarray) {
+                                  if (itemarray[k] == element) {
+                                   
+                                      itemname = k;
+                                  }
+                              }
                                 if (totalprofit >= 100000) {
-                                    $('.ca-result').append("<b>" + element + "</b><br>Profit " + thelink + "<span style='color:white; background:green;padding:3px;margin:3px;line-height: 27px;'>$" + totalprofit + " each</span> </a></span><br>")
+                                    $('.ca-result').append("<b>" + itemname + "</b><br>Profit " + thelink + "<span style='color:white; background:green;padding:3px;margin:3px;line-height: 27px;'>$" + totalprofit + " each</span> </a></span><br>")
 
                                 } else if (totalprofit > 0) {
-                                    $('.ca-result').append("<b>" + element + "</b><br>Profit " + thelink + "<span style='color:white; background:orange;padding:3px;margin:3px;line-height: 27px;'>$" + totalprofit + " each</span> </a></span><br>")
+                                    $('.ca-result').append("<b>" + itemname + "</b><br>Profit " + thelink + "<span style='color:white; background:orange;padding:3px;margin:3px;line-height: 27px;'>$" + totalprofit + " each</span> </a></span><br>")
 
                                 } else {
                                     //$('.ca-result').append("<b>" + element + "</b><br>Profit "+thelink+"<span style='color:white; background:red;padding:3px;margin:3px;line-height: 27px;'>$"+totalprofit+" total</span> </a></span><br>")
