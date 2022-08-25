@@ -19,7 +19,7 @@
 // ==/UserScript==
 console.clear()
 let itemstocheck = "a";
-var version = "3.0";
+var version = "3.2";
 var cmenutoggled = "0";
 var radios = "";
 var marketorbazaar = "";
