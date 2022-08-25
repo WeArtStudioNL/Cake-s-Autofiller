@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Cake's autofiller 
 // @namespace    bazaar
-// @version      2.9
+// @version      3.0
 // @license MIT
 // @description  Helps add items to your bazaar quicker by auto filling Qty and price when clicked
 // @author       Pancakegh[2016971]
@@ -14,10 +14,11 @@
 // @require      https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js
 // @grant        GM_setClipboard
 // @run-at       document-idle
-// @downloadURL  
-// @updateURL    
+// @downloadURL  https://github.com/WeArtStudioNL/Cake-s-Autofiller
+// @updateURL    https://github.com/WeArtStudioNL/Cake-s-Autofiller/blob/master/script.js
 // ==/UserScript==
 
+var version = "3.0";
 var cmenutoggled = "0";
 var radios = "";
 var marketorbazaar = "";
@@ -629,7 +630,7 @@ display:block;
                                     totalprofit = marketprice * pricefactor - bazaarcostone;
                                     console.log("checking based on marketprice * factor");
                                 }
-                                //totalprofit = Math.floor(totalprofit)
+                                totalprofit = Math.round(totalprofit)
                                 $.ajax({
                                     url: "imarket.php",
                                     type: "POST",
@@ -798,7 +799,7 @@ display:block;
   <div id='c-autofiller-container'>
     <div id='ca-inner' style='position:relative;'>
         <span id="ca-pluginname">
-          <span class="ca-title">Cake's autofiller <a class="ca-author" href="https://www.torn.com/profiles.php?XID=2016971">Author ></a></span>
+          <span class="ca-title">Cake's autofiller <pre>${version}</pre> <a class="ca-author" href="https://www.torn.com/profiles.php?XID=2016971">Author ></a></span>
         </span>
         <span id="ca-api">
         <span class="ca-subtitle"><a style="text-decoration:underline;color:white;" href="https://www.torn.com/preferences.php#tab=api">API Key ></a></span>
