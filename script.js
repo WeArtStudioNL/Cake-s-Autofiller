@@ -14,12 +14,12 @@
 // @require      https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js
 // @grant        GM_setClipboard
 // @run-at       document-idle
-// @downloadURL  https://github.com/WeArtStudioNL/Cake-s-Autofiller
+// @downloadURL  https://raw.githubusercontent.com/WeArtStudioNL/Cake-s-Autofiller/master/script.js
 // @updateURL    https://raw.githubusercontent.com/WeArtStudioNL/Cake-s-Autofiller/master/script.js
 // ==/UserScript==
 console.clear()
 let itemstocheck = "a";
-var version = "3.2";
+var version = "3.0";
 var cmenutoggled = "0";
 var radios = "";
 var marketorbazaar = "";
@@ -774,7 +774,7 @@ display:block;
                     fromtime = addHours(offset, startOfDay);
                     totime = addHours(offset + 1, startOfDay);
 
-                    $.getJSON("https://api.torn.com/user?selections=log&from=" + fromtime + "&to=" + totime + "&key=BXsG3twhC5G1v230", function (data) {
+                    $.getJSON("https://api.torn.com/user?selections=log&from=" + fromtime + "&to=" + totime + "&key=" + c_api_key, function (data) {
                         for (main in data) {
                             for (line in data[main]) {
                                 //console.log(data[main][line]);
@@ -826,8 +826,6 @@ display:block;
         //})
 
 
-    } else {
-        sidebarContent = `<span>Please fill in your <a style="text-decoration:underline;color:white;" href="https://www.torn.com/preferences.php#tab=api">API Key</a> above, then refresh the page</span><span class='ca-result'></span>`
     }
     setInterval(function () {
         if ($(".ca-result").html() === "") {
@@ -843,7 +841,7 @@ display:block;
           <span class="ca-title">Cake's autofiller <pre>${version}</pre> <a class="ca-author" href="https://www.torn.com/profiles.php?XID=2016971">Author ></a></span>
         </span>
         <span id="ca-api">
-        <span class="ca-subtitle"><a style="text-decoration:underline;color:white;" href="https://www.torn.com/preferences.php#tab=api">API Key ></a></span>
+        <span class="ca-subtitle"><a style="text-decoration:underline;color:black;" href="https://www.torn.com/preferences.php#tab=api">API Key ></a></span>
         <input class='ca-inputtext' id='c_api_key' type='text' value='` + c_api_key + `'/>
       </span>
       `+ sidebarContent + `
@@ -1062,7 +1060,7 @@ display:block;
         })
     })
     if (localStorage.getItem("tornApi") !== null) {
-        $("#ca-api").hide();
+        //$("#ca-api").hide();
     }
 
 
