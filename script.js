@@ -1092,11 +1092,6 @@ function sellStockShares() {
         $(".ca-result").html('Your trade price copied:<br>$' + checkpricer);
     })
 
-    var observer = new MutationObserver(function (mutations) {
-        if ($("div.amount").length) {
-            observer.disconnect();
-        }
-
 
 
         $("div.amount").children("input.clear-all").focus(function () {
@@ -1116,14 +1111,5 @@ function sellStockShares() {
         });
 
     });
-    var observerTarget = $(".content-wrapper")[0];
-    var observerConfig = {
-        attributes: false,
-        childList: true,
-        characterData: false,
-        subtree: true
-    };
-    observer.observe(observerTarget, observerConfig);
-
 
 })();
