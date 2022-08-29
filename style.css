@@ -1,13 +1,16 @@
 .itemmarketicon {
     mask-position: -77px -42px;
+    -webkit-mask-position: -77px -42px;
 }
 
 .travelicon {
     mask-position: -10px -7px;
+    -webkit-mask-position: -10px -7px;
 }
 
 .stocksicon {
     mask-position: -44px -111px;
+    -webkit-mask-position: -44px -111px;
 }
 
 .svgicon {
