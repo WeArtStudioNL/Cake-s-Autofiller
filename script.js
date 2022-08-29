@@ -17,7 +17,6 @@ var ca_img_opened = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAUCAYAA
 var ca_url = window.location.href;
 var networth = 0;
 var networthnow = 0;
-alertify.set('notifier', 'position', 'top-right');
 
 
 
@@ -807,16 +806,6 @@ function sellStockShares() {
 
             load();
         })
-        //  console.log(data);
-        //    for(main in data){
-        //     for(line in data[main]){
-        //       var date = new Date(data[main][line].timestamp*1000);
-        //     console.log(date.toLocaleDateString() + "/" + date.toLocaleTimeString() + ": " + data[main][line].title);
-        //}
-        //}
-
-        //})
-
 
     }
     setInterval(function () {
