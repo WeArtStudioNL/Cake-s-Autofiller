@@ -22,311 +22,18 @@ var your_money;
 var max_buy_amount;
 var hash = $(location).attr('hash');
 var sidebarContent;
-
-//#endregion
-
-//#region run with interval
-setInterval(function () {
-    if ($(".ca-result").html() === "") {
-        $("#pagespecific").hide();
-    } else {
-        $("#pagespecific").show();
-    }
-}, 300);
-//#endregion
-
-//#region Init scripts
-
-if (marketorbazaar === "market") {
-    radios = `<span style="color:black">Based on:</span>
-    <br>
-    <label>
-        <input type='radio' id='marketorbazaar' name='marketorbazaar' value='market' checked>
-            Marketprice
-        </input>
-        </label>
-        <br>
-    <label>
-        <input type='radio' id='marketorbazaar' name='marketorbazaar' value='bazaar'>
-        Lowest Bazaar
-        </input>
-    </label>`;
-}
-if (marketorbazaar === "bazaar") {
-    radios = `<span style="color:black">Based on:</span>
-    <br>
-    <label>
-        <input type='radio' id='marketorbazaar' name='marketorbazaar' value='market'>
-            Marketprice
-        </input>
-        </label>
-        <br>
-    <label>
-        <input type='radio' id='marketorbazaar' name='marketorbazaar' value='bazaar' checked>
-        Lowest Bazaar
-        </input>
-    </label>`;
-}
-GM_addElement(shadowDOM, 'style', {
-    textContent: GM_getResourceText("stylesheet")
-});
-
-if (ca_url.indexOf("api") === -1) {
-    $("body").append(`
-  <div id='c-autofiller-container'>
-    <div id='ca-inner' style='position:relative;'>
-        <span id="ca-pluginname">
-          <span class="ca-title">Cake's autofiller <a href="https://greasyfork.org/en/scripts/435699-cake-s-autofiller/code" target="_blank">${version}</a> <a class="ca-author" href="https://www.torn.com/profiles.php?XID=2016971">Author ></a></span>
-        </span>
-        <span id="ca-api">
-        <span class="ca-subtitle"><a style="text-decoration:underline;color:black;" href="https://www.torn.com/preferences.php#tab=api">API Key ></a></span>
-        <input class='ca-inputtext' id='c_api_key' type='text' value='` + c_api_key + `'/>
-      </span>
-      `+ sidebarContent + `
-  </div>
-  </div><span class="c-toggler"></span>`);
-
-    addButton()
-    buyStockFast()
-    sellStockShares()
-}
-if (ca_url.indexOf("trade") >= 0) {
-    $("#calctrade").show()
-}
-if (ca_url.indexOf("trade") === -1) {
-    $("#calctrade").hide()
-}
-
-$("<div style='color:#fff;padding:3px;' id='radios'></div>").insertAfter("#ca-pricefactor")
-$("#radios").html(radios);
-
-//#endregion
-
-//#region localStorage 
-
-if (localStorage.getItem("cmenutoggled") !== null) {
-    cmenutoggled = localStorage.getItem("cmenutoggled");
-} else {
-    cmenutoggled = 0;
-    localStorage.setItem("cmenutoggled", cmenutoggled)
-}
-
-if (localStorage.getItem("itemstocheck") !== null) {
-    itemstocheck = JSON.parse(localStorage.getItem("itemstocheck"));
-} else {
-    localStorage.setItem("itemstocheck", JSON.stringify([]))
-}
-
-if (localStorage.getItem("tornApi") !== undefined) {
-    var c_api_key = localStorage.getItem("tornApi");
-    $("#ca-api").hide();
-}
-if (localStorage.getItem("pricefactor") !== undefined) {
-    pricefactor = localStorage.getItem("pricefactor");
-} else {
-    pricefactor = 1;
-}
-$(document).on('change', '#c-pricefactor', function () {
-    pricefactor = $(this).val();
-    console.log(pricefactor)
-    localStorage.setItem("pricefactor", pricefactor);
-});
-
-
-if (localStorage.getItem("marketorbazaar") !== null) {
-    marketorbazaar = localStorage.getItem("marketorbazaar");
-} else {
-    marketorbazaar = "market";
-    localStorage.setItem("marketorbazaar", marketorbazaar)
-}
-
-if (localStorage.getItem("minsearchitems") !== null) {
-    minsearchitems = localStorage.getItem("minsearchitems");
-} else {
-    minsearchitems = 10;
-    localStorage.setItem("minsearchitems", minsearchitems)
-}
-
-$(document).on('change', '#minsearchitems', function () {
-    minsearchitems = $(this).val();
-    localStorage.setItem("minsearchitems", minsearchitems);
-});
-
-if (localStorage.getItem("mintotalprofit") !== null) {
-    mintotalprofit = localStorage.getItem("mintotalprofit");
-} else {
-    mintotalprofit = 10;
-    localStorage.setItem("mintotalprofit", mintotalprofit)
-}
-$(document).on('change', '#mintotalprofit', function () {
-    mintotalprofit = $(this).val();
-    localStorage.setItem("mintotalprofit", mintotalprofit);
-});
-
-//#endregion
-
-//#region interactions
-
-//on api key input
-$(document).on("change", "#c_api_key", function () {
-    var keyinput = $(this).val();
-    $.getJSON("https://api.torn.com/user/?selections=&key=" + keyinput, function (data) {
-        if (data.hasOwnProperty('error')) {
-            $(".ca-result").html("<b style='color:red;'>Incorrect API Key.</b>")
-        } else {
-            localStorage.setItem("tornApi", keyinput);
-            c_api_key = keyinput
-        }
-    })
-})
-
-$(document).on("change", "#marketorbazaar", function () {
-    var string = $(this).val().toString();
-    var cheks = localStorage.setItem("marketorbazaar", string);
-})
-
-$(".c-toggler").on('click', function () {
-    if (cmenutoggled === "0") {
-        $(".c-toggler").html("<img class='ca-toggle-image' src='" + ca_img_opened + "'/>")
-        $(".c-toggler").animate({
-            left: "+=244px",
-        }, 500);
-        $("#c-autofiller-container").animate({
-            left: "+=244px",
-        }, 500);
-        cmenutoggled = "1"
-        localStorage.setItem("cmenutoggled", cmenutoggled)
-    } else if (cmenutoggled === "1") {
-        $(".c-toggler").html("<img class='ca-toggle-image' src='" + ca_img_closed + "'/>")
-        $(".c-toggler").animate({
-            left: "-=244px",
-        }, 500);
-        $("#c-autofiller-container").animate({
-            left: "-=244px",
-        }, 500);
-        cmenutoggled = "0"
-        localStorage.setItem("cmenutoggled", cmenutoggled)
-    }
-});
-
-$(document).on("focus", "input.input-money", function () {
-    ca_url = window.location.href;
-    if (ca_url.indexOf("add") >= 0) {
-        var clicked = $(this)
-        var currentrow
-        var singleitemcost;
-        var imagesource;
-        var inputprice;
-        imagesource = $(this).parent().parent().parent().parent().prev().find(".image-wrap").find("img").attr("src")
-        var itemname = $(this).parent().parent().parent().parent().prev().find(".image-wrap").find("img").attr("alt")
-        var itemid = imagesource.replace(/\//g, "");
-
-        itemid = itemid.replace(/images/g, "");
-        itemid = itemid.replace(/large.png/g, "");
-        itemid = itemid.replace(/items/g, "");
-
-        $.getJSON("https://api.torn.com/torn/" + itemid + "?selections=items&key=" + c_api_key, function (data) {
-            marketitem = data.items[itemid] // buy_price, circulation, description, effect, image, market_value, name, requirement, sell_price, type, weapon_type
-
-            $.getJSON("https://api.torn.com/market/" + itemid + "?selections=bazaar&key=" + c_api_key, function (databazaar) {
-                //console.log(databazaar)
-                lowestbazaar = databazaar.bazaar[0].cost
-                marketprice = marketitem.market_value
-                var totals;
-                var quantity = $(clicked).closest("li").find('.name-wrap').html()
-                var checker = quantity.split(">");
-                if (checker[4] === undefined) {
-                    var newchecker = "1";
-                } else {
-                    var newchecker = checker[4].replace("</span", "");
-                }
-
-                if (localStorage.getItem("marketorbazaar") == "bazaar")
-                    yourprice = Math.ceil(lowestbazaar * parseFloat(pricefactor))
-                if (localStorage.getItem("marketorbazaar") == "market")
-                    yourprice = Math.ceil(marketprice * parseFloat(pricefactor))
-                totals = `<span>total (x` + newchecker + `):</span><br>$` + addCommas(parseInt(newchecker) * yourprice + `<br>Marketprice:<br>` + marketprice + `<br>Your price:<br>` + yourprice)
-                $('.ca-result').html(totals);
-
-                GM_setClipboard(yourprice, "text");
-
-            });
-        })
-
-    }
-    if (ca_url.indexOf("manage") >= 0) {
-        var currentrow
-        var singleitemcost;
-        var imagesource;
-        var inputprice;
-        imagesource = $(this).parent().parent().prev().prev().prev().prev().prev().children().attr("src")
-        var itemname = $(this).parent().parent().prev().prev().prev().prev().prev().children().attr("alt")
-        var itemid = imagesource.replace(/\//g, "");
-
-        itemid = itemid.replace(/images/g, "");
-        itemid = itemid.replace(/medium.png/g, "");
-        itemid = itemid.replace(/items/g, "");
-
-        $.getJSON("https://api.torn.com/torn/" + itemid + "?selections=items&key=" + c_api_key, function (data) {
-            marketitem = data.items[itemid] // buy_price, circulation, description, effect, image, market_value, name, requirement, sell_price, type, weapon_type
-
-            $.getJSON("https://api.torn.com/market/" + itemid + "?selections=bazaar&key=" + c_api_key, function (databazaar) {
-                //console.log(databazaar)
-                lowestbazaar = databazaar.bazaar[0].cost
-                marketprice = marketitem.market_value
-                if (localStorage.getItem("marketorbazaar") == "bazaar")
-                    yourprice = Math.ceil(lowestbazaar * parseFloat(pricefactor))
-                if (localStorage.getItem("marketorbazaar") == "market")
-                    yourprice = Math.ceil(marketprice * parseFloat(pricefactor))
-                GM_setClipboard(yourprice, "text");
-                $(".ca-result").html(`<b>Pricefactor: ` + pricefactor + `<br><b>` + marketitem.name + `</b><br>Lowest Bazaar<br> $` + addCommas(lowestbazaar) + `<br>Marketprice<br>$` + addCommas(marketprice) + `<br>Your price<br> $` + addCommas(yourprice) + `<br>`);
-            });
-        })
-    }
-})
-
-$("div.amount").children("input.clear-all").focus(function () {
-    var quantityText = $(this).parent().parent().parent().prev().children(".name-wrap").children(".t-hide").text();
-    if (quantityText === '') {
-        quantityText = 1;
-    } else {
-        if (quantityText.indexOf(' x') == -1) {
-            quantityText = quantityText.replace(/\s/g, '')
-            quantityText = quantityText.replace("x", "")
-        } else {
-            $(this).val("1")
-        }
-    }
-    GM_setClipboard(quantityText, "text");
-    $(".ca-result").html('max amount set:<br>' + quantityText);
-});
-
-//Get total value in current trade window
-$(document).on("click", "#calctrade", function () {
-    var container = $(this).parent().parent().parent();
-    var checkpricer = 0;
-    var itemprice = 0;
-    $('.right').find('*').each(function () {
-        if ($(this).hasClass("tt-item-value")) {
-
-            itemprice = $(this).text().replace("$", "")
-            itemprice = itemprice.replace(/,/g, '')
-            itemprice = itemprice.replace(/\s/g, '')
-            itemprice = itemprice * pricefactor;
-            checkpricer = checkpricer + itemprice;
-        }
-    });
-    //console.log(checkpricer)
-    checkpricer = Math.ceil(checkpricer);
-    checkpricer = addCommas(checkpricer);
-
-    GM_setClipboard(checkpricer, "text");
-    $(".ca-result").html('Your trade price copied:<br>$' + checkpricer);
-})
+var scriptstoload = ["https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js", "https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"];
 
 //#endregion
 
 //#region functions
+function dynamicallyLoadScript(url) {
+    var script = document.createElement("script");  // create a script DOM node
+    script.src = url;  // set its src to the provided URL
+
+    document.head.appendChild(script);  // add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
+}
+
 if (cmenutoggled === "0") {
     $("#c-autofiller-container").css("left", "-244px");
     $(".c-toggler").css("left", "-30px");
@@ -660,6 +367,309 @@ async function getMarketListingByItemId(itemId) {
 
 //#endregion
 
+//#region run with interval
+setInterval(function () {
+    if ($(".ca-result").html() === "") {
+        $("#pagespecific").hide();
+    } else {
+        $("#pagespecific").show();
+    }
+}, 300);
+//#endregion
+
+//#region Init scripts
+for (var index in scriptstoload) {
+    dynamicallyLoadScript(scriptstoload[index]);
+}
+if (marketorbazaar === "market") {
+    radios = `<span style="color:black">Based on:</span>
+    <br>
+    <label>
+        <input type='radio' id='marketorbazaar' name='marketorbazaar' value='market' checked>
+            Marketprice
+        </input>
+        </label>
+        <br>
+    <label>
+        <input type='radio' id='marketorbazaar' name='marketorbazaar' value='bazaar'>
+        Lowest Bazaar
+        </input>
+    </label>`;
+}
+if (marketorbazaar === "bazaar") {
+    radios = `<span style="color:black">Based on:</span>
+    <br>
+    <label>
+        <input type='radio' id='marketorbazaar' name='marketorbazaar' value='market'>
+            Marketprice
+        </input>
+        </label>
+        <br>
+    <label>
+        <input type='radio' id='marketorbazaar' name='marketorbazaar' value='bazaar' checked>
+        Lowest Bazaar
+        </input>
+    </label>`;
+}
+GM_addElement(shadowDOM, 'style', {
+    textContent: GM_getResourceText("stylesheet")
+});
+
+if (ca_url.indexOf("api") === -1) {
+    $("body").append(`
+  <div id='c-autofiller-container'>
+    <div id='ca-inner' style='position:relative;'>
+        <span id="ca-pluginname">
+          <span class="ca-title">Cake's autofiller <a href="https://greasyfork.org/en/scripts/435699-cake-s-autofiller/code" target="_blank">${version}</a> <a class="ca-author" href="https://www.torn.com/profiles.php?XID=2016971">Author ></a></span>
+        </span>
+        <span id="ca-api">
+        <span class="ca-subtitle"><a style="text-decoration:underline;color:black;" href="https://www.torn.com/preferences.php#tab=api">API Key ></a></span>
+        <input class='ca-inputtext' id='c_api_key' type='text' value='` + c_api_key + `'/>
+      </span>
+      `+ sidebarContent + `
+  </div>
+  </div><span class="c-toggler"></span>`);
+
+    addButton()
+    buyStockFast()
+    sellStockShares()
+}
+if (ca_url.indexOf("trade") >= 0) {
+    $("#calctrade").show()
+}
+if (ca_url.indexOf("trade") === -1) {
+    $("#calctrade").hide()
+}
+
+$("<div style='color:#fff;padding:3px;' id='radios'></div>").insertAfter("#ca-pricefactor")
+$("#radios").html(radios);
+
+//#endregion
+
+//#region localStorage 
+
+if (localStorage.getItem("cmenutoggled") !== null) {
+    cmenutoggled = localStorage.getItem("cmenutoggled");
+} else {
+    cmenutoggled = 0;
+    localStorage.setItem("cmenutoggled", cmenutoggled)
+}
+
+if (localStorage.getItem("itemstocheck") !== null) {
+    itemstocheck = JSON.parse(localStorage.getItem("itemstocheck"));
+} else {
+    localStorage.setItem("itemstocheck", JSON.stringify([]))
+}
+
+if (localStorage.getItem("tornApi") !== undefined) {
+    var c_api_key = localStorage.getItem("tornApi");
+    $("#ca-api").hide();
+}
+if (localStorage.getItem("pricefactor") !== undefined) {
+    pricefactor = localStorage.getItem("pricefactor");
+} else {
+    pricefactor = 1;
+}
+$(document).on('change', '#c-pricefactor', function () {
+    pricefactor = $(this).val();
+    console.log(pricefactor)
+    localStorage.setItem("pricefactor", pricefactor);
+});
+
+
+if (localStorage.getItem("marketorbazaar") !== null) {
+    marketorbazaar = localStorage.getItem("marketorbazaar");
+} else {
+    marketorbazaar = "market";
+    localStorage.setItem("marketorbazaar", marketorbazaar)
+}
+
+if (localStorage.getItem("minsearchitems") !== null) {
+    minsearchitems = localStorage.getItem("minsearchitems");
+} else {
+    minsearchitems = 10;
+    localStorage.setItem("minsearchitems", minsearchitems)
+}
+
+$(document).on('change', '#minsearchitems', function () {
+    minsearchitems = $(this).val();
+    localStorage.setItem("minsearchitems", minsearchitems);
+});
+
+if (localStorage.getItem("mintotalprofit") !== null) {
+    mintotalprofit = localStorage.getItem("mintotalprofit");
+} else {
+    mintotalprofit = 10;
+    localStorage.setItem("mintotalprofit", mintotalprofit)
+}
+$(document).on('change', '#mintotalprofit', function () {
+    mintotalprofit = $(this).val();
+    localStorage.setItem("mintotalprofit", mintotalprofit);
+});
+
+//#endregion
+
+//#region interactions
+
+//on api key input
+$(document).on("change", "#c_api_key", function () {
+    var keyinput = $(this).val();
+    $.getJSON("https://api.torn.com/user/?selections=&key=" + keyinput, function (data) {
+        if (data.hasOwnProperty('error')) {
+            $(".ca-result").html("<b style='color:red;'>Incorrect API Key.</b>")
+        } else {
+            localStorage.setItem("tornApi", keyinput);
+            c_api_key = keyinput
+        }
+    })
+})
+
+$(document).on("change", "#marketorbazaar", function () {
+    var string = $(this).val().toString();
+    var cheks = localStorage.setItem("marketorbazaar", string);
+})
+
+$(".c-toggler").on('click', function () {
+    if (cmenutoggled === "0") {
+        $(".c-toggler").html("<img class='ca-toggle-image' src='" + ca_img_opened + "'/>")
+        $(".c-toggler").animate({
+            left: "+=244px",
+        }, 500);
+        $("#c-autofiller-container").animate({
+            left: "+=244px",
+        }, 500);
+        cmenutoggled = "1"
+        localStorage.setItem("cmenutoggled", cmenutoggled)
+    } else if (cmenutoggled === "1") {
+        $(".c-toggler").html("<img class='ca-toggle-image' src='" + ca_img_closed + "'/>")
+        $(".c-toggler").animate({
+            left: "-=244px",
+        }, 500);
+        $("#c-autofiller-container").animate({
+            left: "-=244px",
+        }, 500);
+        cmenutoggled = "0"
+        localStorage.setItem("cmenutoggled", cmenutoggled)
+    }
+});
+
+$(document).on("focus", "input.input-money", function () {
+    ca_url = window.location.href;
+    if (ca_url.indexOf("add") >= 0) {
+        var clicked = $(this)
+        var currentrow
+        var singleitemcost;
+        var imagesource;
+        var inputprice;
+        imagesource = $(this).parent().parent().parent().parent().prev().find(".image-wrap").find("img").attr("src")
+        var itemname = $(this).parent().parent().parent().parent().prev().find(".image-wrap").find("img").attr("alt")
+        var itemid = imagesource.replace(/\//g, "");
+
+        itemid = itemid.replace(/images/g, "");
+        itemid = itemid.replace(/large.png/g, "");
+        itemid = itemid.replace(/items/g, "");
+
+        $.getJSON("https://api.torn.com/torn/" + itemid + "?selections=items&key=" + c_api_key, function (data) {
+            marketitem = data.items[itemid] // buy_price, circulation, description, effect, image, market_value, name, requirement, sell_price, type, weapon_type
+
+            $.getJSON("https://api.torn.com/market/" + itemid + "?selections=bazaar&key=" + c_api_key, function (databazaar) {
+                //console.log(databazaar)
+                lowestbazaar = databazaar.bazaar[0].cost
+                marketprice = marketitem.market_value
+                var totals;
+                var quantity = $(clicked).closest("li").find('.name-wrap').html()
+                var checker = quantity.split(">");
+                if (checker[4] === undefined) {
+                    var newchecker = "1";
+                } else {
+                    var newchecker = checker[4].replace("</span", "");
+                }
+
+                if (localStorage.getItem("marketorbazaar") == "bazaar")
+                    yourprice = Math.ceil(lowestbazaar * parseFloat(pricefactor))
+                if (localStorage.getItem("marketorbazaar") == "market")
+                    yourprice = Math.ceil(marketprice * parseFloat(pricefactor))
+                totals = `<span>total (x` + newchecker + `):</span><br>$` + addCommas(parseInt(newchecker) * yourprice + `<br>Marketprice:<br>` + marketprice + `<br>Your price:<br>` + yourprice)
+                $('.ca-result').html(totals);
+
+                GM_setClipboard(yourprice, "text");
+
+            });
+        })
+
+    }
+    if (ca_url.indexOf("manage") >= 0) {
+        var currentrow
+        var singleitemcost;
+        var imagesource;
+        var inputprice;
+        imagesource = $(this).parent().parent().prev().prev().prev().prev().prev().children().attr("src")
+        var itemname = $(this).parent().parent().prev().prev().prev().prev().prev().children().attr("alt")
+        var itemid = imagesource.replace(/\//g, "");
+
+        itemid = itemid.replace(/images/g, "");
+        itemid = itemid.replace(/medium.png/g, "");
+        itemid = itemid.replace(/items/g, "");
+
+        $.getJSON("https://api.torn.com/torn/" + itemid + "?selections=items&key=" + c_api_key, function (data) {
+            marketitem = data.items[itemid] // buy_price, circulation, description, effect, image, market_value, name, requirement, sell_price, type, weapon_type
+
+            $.getJSON("https://api.torn.com/market/" + itemid + "?selections=bazaar&key=" + c_api_key, function (databazaar) {
+                //console.log(databazaar)
+                lowestbazaar = databazaar.bazaar[0].cost
+                marketprice = marketitem.market_value
+                if (localStorage.getItem("marketorbazaar") == "bazaar")
+                    yourprice = Math.ceil(lowestbazaar * parseFloat(pricefactor))
+                if (localStorage.getItem("marketorbazaar") == "market")
+                    yourprice = Math.ceil(marketprice * parseFloat(pricefactor))
+                GM_setClipboard(yourprice, "text");
+                $(".ca-result").html(`<b>Pricefactor: ` + pricefactor + `<br><b>` + marketitem.name + `</b><br>Lowest Bazaar<br> $` + addCommas(lowestbazaar) + `<br>Marketprice<br>$` + addCommas(marketprice) + `<br>Your price<br> $` + addCommas(yourprice) + `<br>`);
+            });
+        })
+    }
+})
+
+$("div.amount").children("input.clear-all").focus(function () {
+    var quantityText = $(this).parent().parent().parent().prev().children(".name-wrap").children(".t-hide").text();
+    if (quantityText === '') {
+        quantityText = 1;
+    } else {
+        if (quantityText.indexOf(' x') == -1) {
+            quantityText = quantityText.replace(/\s/g, '')
+            quantityText = quantityText.replace("x", "")
+        } else {
+            $(this).val("1")
+        }
+    }
+    GM_setClipboard(quantityText, "text");
+    $(".ca-result").html('max amount set:<br>' + quantityText);
+});
+
+//Get total value in current trade window
+$(document).on("click", "#calctrade", function () {
+    var container = $(this).parent().parent().parent();
+    var checkpricer = 0;
+    var itemprice = 0;
+    $('.right').find('*').each(function () {
+        if ($(this).hasClass("tt-item-value")) {
+
+            itemprice = $(this).text().replace("$", "")
+            itemprice = itemprice.replace(/,/g, '')
+            itemprice = itemprice.replace(/\s/g, '')
+            itemprice = itemprice * pricefactor;
+            checkpricer = checkpricer + itemprice;
+        }
+    });
+    //console.log(checkpricer)
+    checkpricer = Math.ceil(checkpricer);
+    checkpricer = addCommas(checkpricer);
+
+    GM_setClipboard(checkpricer, "text");
+    $(".ca-result").html('Your trade price copied:<br>$' + checkpricer);
+})
+
+//#endregion
+
 //#region Edit item window and info popup functionality
 
 function refreshItemwindow(edititems = true, content = null) {
@@ -968,9 +978,3 @@ $(document).on("keyup", "#searchbar", function () {
 });
 
 //#endregion
-
-
-
-
-
-
