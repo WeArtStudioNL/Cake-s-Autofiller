@@ -551,7 +551,7 @@ function sellStockShares() {
         $("#ca-sellStockShares").hide()
     }
 }
-(function () {
+
     GM_addElement(shadowDOM, 'style', {
         textContent: GM_getResourceText("stylesheet")
     });
@@ -1110,6 +1110,3 @@ function sellStockShares() {
             $(".ca-result").html('max amount set:<br>' + quantityText);
         });
 
-    });
-//test what sdsdsd
-})();
